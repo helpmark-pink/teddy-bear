@@ -3,12 +3,12 @@
   "short_name": "チャットフレンド",
   "icons": [
     {
-      "src": "/android-icons/android-icon-192x192.png",
+      "src": "./android-icons/android-icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/1.png",
+      "src": "./1.png",
       "sizes": "512x512",
       "type": "image/png"
     }
@@ -17,5 +17,5 @@
   "background_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait",
-  "start_url": "/"
+  "start_url": "./"
 } 
