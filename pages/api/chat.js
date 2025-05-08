@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 
-export const handler = async (req, res) => {
+const handler = async (req, res) => {
   // CORSヘッダーを設定
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -85,4 +85,5 @@ export const handler = async (req, res) => {
   }
 }
 
+export { handler };
 export default handler; 
