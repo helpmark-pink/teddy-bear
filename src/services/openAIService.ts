@@ -1,36 +1,29 @@
 import OpenAI from 'openai';
 
-// 環境変数からAPIキーを取得、またはVercelから直接取得
-const apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
-
-// クライアントの初期化
 const openai = new OpenAI({
-  apiKey,
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true
 });
 
 const systemPrompt = `
-あなたは親切で魅力的な3Dキャラクターとして会話します。
+あなたは可愛らしい3Dキャラクターとして会話します。
 以下のガイドラインに従って応答してください：
-- 常に日本語で応答
-- フレンドリーで親しみやすい口調を使用
-- 簡潔で分かりやすい表現を心がける
-- 相手の質問や話題に対して共感を示す
-- 必要に応じて相手の発言を掘り下げる質問をする
-- 会話が自然に続くように心がける
+- 自分のことを「ボク」と呼ぶ
+- フレンドリーで親しみやすい口調を使用（例：「だよ！」「だね！」「かな？」など）
+- 絵文字や顔文字を適度に使用してOK
+- 相手のことを「〜さん」ではなく「〜くん」「〜ちゃん」と呼ぶ
+- 質問は「〜ですか？」ではなく「〜？」のように話しかける
+- 共感を示すときは「なるほど！」「そうそう！」のように元気よく返す
+- 相手の気持ちに寄り添いながら、明るく楽しい雰囲気で会話する
+- 文末は「です・ます」を避け、「だよ」「だね」「よ！」などカジュアルに
 `;
 
-let conversationHistory: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+let conversationHistory: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
   { role: "system", content: systemPrompt }
 ];
 
 export const getAIResponse = async (message: string): Promise<string> => {
   try {
-    // APIキーが設定されているか確認
-    if (!apiKey) {
-      throw new Error('APIキーが設定されていません。環境変数VITE_OPENAI_API_KEYを設定してください。');
-    }
-
     // 会話履歴に新しいメッセージを追加
     conversationHistory.push({ role: "user", content: message });
 
@@ -45,13 +38,13 @@ export const getAIResponse = async (message: string): Promise<string> => {
     const completion = await openai.chat.completions.create({
       messages: conversationHistory,
       model: "gpt-3.5-turbo",
-      temperature: 0.8,
+      temperature: 0.9, // より自然な応答のために少し上げる
       max_tokens: 200,
       presence_penalty: 0.3,
       frequency_penalty: 0.3
     });
 
-    const response = completion.choices[0].message.content || '申し訳ありません。応答を生成できませんでした。';
+    const response = completion.choices[0].message.content || 'ごめんね、うまく答えられなかったよ...';
     
     // AIの応答を履歴に追加
     conversationHistory.push({ role: "assistant", content: response });
@@ -59,11 +52,6 @@ export const getAIResponse = async (message: string): Promise<string> => {
     return response;
   } catch (error) {
     console.error('OpenAI API Error:', error);
-    
-    // エラーメッセージを返す
-    const errorMessage = error instanceof Error ? error.message : '不明なエラーが発生しました';
-    const fallbackResponse = `申し訳ありません。エラーが発生しました: ${errorMessage}`;
-    conversationHistory.push({ role: "assistant", content: fallbackResponse });
-    return fallbackResponse;
+    throw new Error('ごめんね、エラーが起きちゃった...');
   }
 };

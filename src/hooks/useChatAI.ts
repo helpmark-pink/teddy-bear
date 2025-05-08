@@ -6,7 +6,7 @@ import { useSpeechSynthesis } from './useSpeechSynthesis';
 
 export const useChatAI = (lipSync: LipSyncController) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { addMessage, setIsSpeaking } = useChatStore();
+  const { addMessage, setIsSpeaking, audioEnabled } = useChatStore();
   const { speak } = useSpeechSynthesis();
 
   const processMessage = async (message: string) => {
@@ -18,19 +18,16 @@ export const useChatAI = (lipSync: LipSyncController) => {
 
       const response = await getAIResponse(message);
       
-      // リップシンクアニメーションの開始
-      setIsSpeaking(true);
-      lipSync.startTalking();
-      
-      // メッセージの追加
-      addMessage(response, 'ai');
-      
-      // 音声合成で応答を読み上げ
-      await speak(response);
-      
-      // アニメーションの終了
-      lipSync.stopTalking();
-      setIsSpeaking(false);
+      if (audioEnabled) {
+        setIsSpeaking(true);
+        lipSync.startTalking();
+        addMessage(response, 'ai');
+        await speak(response);
+        lipSync.stopTalking();
+        setIsSpeaking(false);
+      } else {
+        addMessage(response, 'ai');
+      }
     } catch (error) {
       console.error('Error processing message:', error);
       addMessage('申し訳ありません。エラーが発生しました。', 'ai');

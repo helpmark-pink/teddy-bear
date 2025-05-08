@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mic, MicOff, Send } from 'lucide-react';
+import { Volume2, VolumeX, Send } from 'lucide-react';
 
 interface SpeechControlsProps {
   isListening: boolean;
@@ -33,14 +33,15 @@ export const SpeechControls: React.FC<SpeechControlsProps> = ({
           onClick={onToggleListen}
           className={`p-2 md:p-3 rounded-full transition-all duration-300 shadow-md hover:shadow-lg ${
             isListening
-              ? 'bg-gradient-to-r from-red-400 to-pink-500 text-white animate-pulse'
+              ? 'bg-gradient-to-r from-green-400 to-green-500 text-white'
               : 'bg-gradient-to-r from-pink-400 to-pink-500 text-white hover:from-pink-500 hover:to-pink-600'
           }`}
+          aria-label={isListening ? '音声をオフにする' : '音声をオンにする'}
         >
           {isListening ? (
-            <MicOff className="w-5 h-5 md:w-6 md:h-6" />
+            <Volume2 className="w-5 h-5 md:w-6 md:h-6" />
           ) : (
-            <Mic className="w-5 h-5 md:w-6 md:h-6" />
+            <VolumeX className="w-5 h-5 md:w-6 md:h-6" />
           )}
         </button>
         <input
@@ -54,6 +55,7 @@ export const SpeechControls: React.FC<SpeechControlsProps> = ({
           type="submit"
           disabled={!inputText.trim()}
           className="p-2 md:p-3 rounded-full bg-gradient-to-r from-pink-400 to-pink-500 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:from-pink-500 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="メッセージを送信"
         >
           <Send className="w-5 h-5 md:w-6 md:h-6" />
         </button>

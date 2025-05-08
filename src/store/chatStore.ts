@@ -8,6 +8,7 @@ export const useChatStore = create<ChatState>()(
       messages: [],
       isListening: false,
       isSpeaking: false,
+      audioEnabled: false,
       addMessage: (text: string, sender: 'user' | 'ai') => {
         const newMessage: Message = {
           id: Date.now().toString(),
@@ -22,6 +23,7 @@ export const useChatStore = create<ChatState>()(
       clearHistory: () => set({ messages: [] }),
       setIsListening: (value: boolean) => set({ isListening: value }),
       setIsSpeaking: (value: boolean) => set({ isSpeaking: value }),
+      setAudioEnabled: (value: boolean) => set({ audioEnabled: value }),
     }),
     {
       name: 'chat-storage',

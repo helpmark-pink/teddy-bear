@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Message } from '../types';
+import { Message, ChatState } from '../types';
 import { MessageCircle, Bot, Trash2 } from 'lucide-react';
 import { useChatStore } from '../store/chatStore';
 
@@ -9,7 +9,7 @@ interface ChatHistoryProps {
 
 export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const clearHistory = useChatStore((state) => state.clearHistory);
+  const clearHistory = useChatStore((state: ChatState) => state.clearHistory);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -26,6 +26,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages }) => {
           onClick={clearHistory}
           className="absolute top-2 right-2 p-2 rounded-full bg-pink-100 hover:bg-pink-200 transition-colors"
           title="履歴を消去"
+          aria-label="チャット履歴を消去"
         >
           <Trash2 className="w-4 h-4 text-pink-600" />
         </button>
@@ -64,4 +65,4 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages }) => {
       <div ref={messagesEndRef} />
     </div>
   );
-}
+};
