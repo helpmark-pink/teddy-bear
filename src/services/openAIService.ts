@@ -1,9 +1,11 @@
-import OpenAI from 'openai';
+// openAIService.ts
+// 会話履歴を管理するための型と初期状態
 
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
+// 会話履歴の型定義
+type ConversationHistoryItem = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
 
 const systemPrompt = `
 あなたは可愛らしい3Dキャラクターとして会話します。
@@ -18,7 +20,8 @@ const systemPrompt = `
 - 文末は「です・ます」を避け、「だよ」「だね」「よ！」などカジュアルに
 `;
 
-let conversationHistory: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+// 会話履歴を保持（クライアント側のみで使用）
+let conversationHistory: ConversationHistoryItem[] = [
   { role: "system", content: systemPrompt }
 ];
 
@@ -35,23 +38,28 @@ export const getAIResponse = async (message: string): Promise<string> => {
       ];
     }
 
-    const completion = await openai.chat.completions.create({
-      messages: conversationHistory,
-      model: "gpt-3.5-turbo",
-      temperature: 0.9, // より自然な応答のために少し上げる
-      max_tokens: 200,
-      presence_penalty: 0.3,
-      frequency_penalty: 0.3
+    // サーバーサイドAPIを呼び出す
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message }),
     });
 
-    const response = completion.choices[0].message.content || 'ごめんね、うまく答えられなかったよ...';
+    if (!response.ok) {
+      throw new Error('API request failed');
+    }
+
+    const data = await response.json();
+    const aiResponse = data.response;
     
     // AIの応答を履歴に追加
-    conversationHistory.push({ role: "assistant", content: response });
+    conversationHistory.push({ role: "assistant", content: aiResponse });
 
-    return response;
+    return aiResponse;
   } catch (error) {
-    console.error('OpenAI API Error:', error);
+    console.error('Chat API Error:', error);
     throw new Error('ごめんね、エラーが起きちゃった...');
   }
 };
