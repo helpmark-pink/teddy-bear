@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 
-const handler = async (req, res) => {
+export const handler = async (req, res) => {
   // CORSヘッダーを設定
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,13 +12,12 @@ const handler = async (req, res) => {
 
   // OPTIONSリクエストの処理
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
   // POSTリクエストのみ受け付ける
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed. Only POST requests are accepted.' });
   }
   
   try {
@@ -83,7 +82,6 @@ const handler = async (req, res) => {
     
     return res.status(500).json({ error: errorMessage });
   }
-}
+};
 
-export { handler };
 export default handler; 
