@@ -10,6 +10,11 @@ const __dirname = dirname(__filename);
 
 dotenv.config();
 
+// APIキーの存在を確認
+if (!process.env.OPENAI_API_KEY) {
+  console.warn('警告: OPENAI_API_KEYが設定されていません。.envファイルを確認してください。');
+}
+
 const app = express();
 const port = process.env.PORT || 3000;
 

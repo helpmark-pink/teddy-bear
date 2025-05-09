@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 
-const handler = async (req, res) => {
+// デフォルトエクスポートに変更
+export default async function handler(req, res) {
   // CORSヘッダーを設定
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -27,14 +28,15 @@ const handler = async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // APIキーが設定されているか確認
-    if (!process.env.OPENAI_API_KEY) {
+    // APIキーを設定
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
       console.error('OpenAI API Key is not set');
       return res.status(500).json({ error: 'OpenAI APIキーが設定されていません。環境変数を確認してください。' });
     }
     
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
+      apiKey: apiKey
     });
     
     const systemPrompt = `
@@ -82,7 +84,4 @@ const handler = async (req, res) => {
     
     return res.status(500).json({ error: errorMessage });
   }
-};
-
-// デフォルトエクスポートに変更
-export default handler; 
+} 
