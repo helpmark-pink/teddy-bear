@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChatHistory } from './components/ChatHistory';
 import { SpeechControls } from './components/SpeechControls';
 import { CharacterScene, lipSync } from './components/CharacterScene';
 import { useChatStore } from './store/chatStore';
 import { useChatAI } from './hooks/useChatAI';
 
-// Window型を拡張してoperaプロパティを追加
+// Window型を拡張
 declare global {
   interface Window {
     opera?: unknown;
@@ -16,6 +16,8 @@ function App() {
   const [inputText, setInputText] = useState('');
   const { messages, isListening, setIsListening, setAudioEnabled, audioEnabled } = useChatStore();
   const { processMessage } = useChatAI(lipSync);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const appRef = useRef<HTMLDivElement>(null);
 
   // デバイスサイズの判定
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -63,6 +65,71 @@ function App() {
       }
     }
   }, [isListening, setIsListening, setAudioEnabled, isMobileDevice]);
+
+  // キーボードの表示状態を検出する
+  useEffect(() => {
+    // iOS用のVisualViewport APIを使用
+    if (isMobileDevice && window.visualViewport) {
+      const viewportHandler = () => {
+        const currentHeight = window.visualViewport?.height || window.innerHeight;
+        const isKeyboard = currentHeight < window.innerHeight * 0.8;
+        setIsKeyboardOpen(isKeyboard);
+        
+        // ルート要素のカスタムプロパティを更新してキーボード高さを反映
+        if (isKeyboard) {
+          document.documentElement.style.setProperty(
+            '--keyboard-height', 
+            `${window.innerHeight - currentHeight}px`
+          );
+          
+          // キーボード表示時のクラスを追加
+          if (appRef.current) {
+            appRef.current.classList.add('keyboard-open');
+          }
+        } else {
+          document.documentElement.style.setProperty('--keyboard-height', '0px');
+          if (appRef.current) {
+            appRef.current.classList.remove('keyboard-open');
+          }
+        }
+      };
+      
+      window.visualViewport.addEventListener('resize', viewportHandler);
+      
+      return () => {
+        window.visualViewport?.removeEventListener('resize', viewportHandler);
+      };
+    }
+    
+    // Android用: input要素のフォーカスとブラーイベントでキーボード表示を検出
+    const inputs = document.querySelectorAll('input, textarea');
+    
+    const handleFocus = () => {
+      setIsKeyboardOpen(true);
+      if (appRef.current) {
+        appRef.current.classList.add('keyboard-open');
+      }
+    };
+    
+    const handleBlur = () => {
+      setIsKeyboardOpen(false);
+      if (appRef.current) {
+        appRef.current.classList.remove('keyboard-open');
+      }
+    };
+    
+    inputs.forEach(input => {
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('blur', handleBlur);
+    });
+    
+    return () => {
+      inputs.forEach(input => {
+        input.removeEventListener('focus', handleFocus);
+        input.removeEventListener('blur', handleBlur);
+      });
+    };
+  }, [isMobileDevice]);
 
   // モバイルでの音声と表示の初期化
   useEffect(() => {
@@ -141,7 +208,7 @@ function App() {
     
     // モバイルデバイスでAIが話している時のスクロール制御
     const handleScroll = () => {
-      if (isMobileDevice && isSpeaking) {
+      if (isMobileDevice && isSpeaking && !isKeyboardOpen) {
         // 3Dモデルが見えるように上部にスクロール位置を固定
         window.scrollTo({ top: 0 });
       }
@@ -154,7 +221,7 @@ function App() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [isMobileDevice]);
+  }, [isMobileDevice, isKeyboardOpen]);
 
   // キャラクターコンテナのクラス名を決定
   const characterContainerClass = `w-full md:w-1/2 flex-shrink-0 character-container ${
@@ -196,8 +263,18 @@ function App() {
 
   return (
     <div 
-      className="fixed inset-0 bg-gradient-to-b from-pink-100 via-pink-50 to-white flex flex-col" 
-      style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+      ref={appRef}
+      className={`fixed inset-0 bg-gradient-to-b from-pink-100 via-pink-50 to-white flex flex-col app-container ${
+        isKeyboardOpen ? 'keyboard-open' : ''
+      }`}
+      style={{ 
+        height: 'calc(var(--vh, 1vh) * 100)',
+        // キーボード表示時の高さ調整
+        ...(isKeyboardOpen && isMobileDevice ? {
+          height: `calc(100vh - var(--keyboard-height))`,
+          overflow: 'hidden'
+        } : {})
+      }}
     >
       <h1 className={titleClass}>
         AI チャットフレンド

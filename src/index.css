@@ -4,11 +4,13 @@
 
 :root {
   --app-height: 100%;
+  --keyboard-height: 0px;
 }
 
 html {
   height: -webkit-fill-available;
   -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
 }
 
 body {
@@ -25,6 +27,9 @@ body {
 #root {
   height: 100vh;
   height: calc(var(--vh, 1vh) * 100);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 @supports (-webkit-touch-callout: none) {
@@ -39,6 +44,7 @@ body {
   .device-small, .device-medium {
     padding: 0.35rem !important;
     gap: 0.35rem !important;
+    overflow: hidden !important;
   }
   
   /* タイトル部分を最小化 */
@@ -59,6 +65,7 @@ body {
     min-height: 150px !important;
     display: flex !important;
     flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   /* チャット履歴エリアが必ず表示されるように */
@@ -66,6 +73,7 @@ body {
     flex: 1 !important;
     overflow-y: auto !important;
     min-height: 100px !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   /* フッターを固定 */
@@ -75,6 +83,19 @@ body {
     width: 100% !important;
     background-color: white !important;
     z-index: 20 !important;
+  }
+  
+  /* キーボード表示時の対応 */
+  .mobile-controls {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+  
+  /* 入力エリアがキーボードで押し上げられないように */
+  .chat-input-area {
+    transform: translateZ(0);
+    will-change: transform;
   }
 }
 
@@ -209,12 +230,29 @@ body {
   }
 }
 
+/* キーボード開いたときの対応 - iOS特有の対策 */
+@media screen and (max-width: 768px) {
+  @supports (-webkit-touch-callout: none) {
+    .keyboard-open .character-container {
+      max-height: 180px !important;
+      height: 30vh !important;
+    }
+    
+    /* キーボード表示時はチャット履歴を拡大 */
+    .keyboard-open .chat-history {
+      flex-grow: 3 !important;
+    }
+  }
+}
+
 /* 3Dモデル容器のスタイリング */
 .character-container {
   width: 100%;
   height: 100%;
   overflow: hidden;
   position: relative;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .character-container canvas {
@@ -238,4 +276,28 @@ body {
   align-items: center;
   padding: 0.5rem;
   gap: 0.5rem;
+}
+
+/* モバイルキーボード対応用 */
+.mobile-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ビジュアルスタビリティ改善 - レイアウトシフト防止 */
+.fixed-ratio-container {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+}
+
+/* iOS 16+とそれ以降のSafariのキーボードハンドリング対応 */
+@supports (-webkit-touch-callout: none) {
+  @media screen and (max-width: 768px) {
+    .app-container {
+      min-height: -webkit-fill-available;
+      height: -webkit-fill-available;
+    }
+  }
 }
