@@ -33,6 +33,7 @@ export default async function handler(req, res) {
       console.error('OpenAI API Key is not set');
       return res.status(500).json({ error: 'OpenAI APIキーが設定されていません。環境変数を確認してください。' });
     }
+    console.log('APIキーの設定状況: 設定済み');
     
     // OpenAI APIの設定
     const configuration = new Configuration({
