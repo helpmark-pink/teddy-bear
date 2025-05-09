@@ -39,6 +39,7 @@ export const getAIResponse = async (message: string): Promise<string> => {
     }
 
     // サーバーサイドAPIを呼び出す
+    console.log('APIリクエスト送信: /api/chat');
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: {
@@ -49,6 +50,7 @@ export const getAIResponse = async (message: string): Promise<string> => {
         history: conversationHistory 
       }),
     });
+    console.log('APIレスポンスステータス:', response.status);
 
     if (!response.ok) {
       console.error('API Error status:', response.status);
