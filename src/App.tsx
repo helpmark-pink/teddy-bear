@@ -135,6 +135,27 @@ function App() {
     };
   }, [isMobileDevice, setAudioEnabled]);
 
+  // AIが話している間はモバイルデバイスでスクロールを制御
+  useEffect(() => {
+    const { isSpeaking } = useChatStore.getState();
+    
+    // モバイルデバイスでAIが話している時のスクロール制御
+    const handleScroll = () => {
+      if (isMobileDevice && isSpeaking) {
+        // 3Dモデルが見えるように上部にスクロール位置を固定
+        window.scrollTo({ top: 0 });
+      }
+    };
+    
+    if (isMobileDevice) {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    }
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isMobileDevice]);
+
   // キャラクターコンテナのクラス名を決定
   const characterContainerClass = `w-full md:w-1/2 flex-shrink-0 character-container ${
     isLargePhone
