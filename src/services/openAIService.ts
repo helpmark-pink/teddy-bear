@@ -51,12 +51,39 @@ export const getAIResponse = async (message: string): Promise<string> => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'API request failed');
+      console.error('API Error status:', response.status);
+      if (response.status === 405) {
+        throw new Error('メソッドが許可されていません。POSTリクエストのみ受け付けています。');
+      }
+      
+      try {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API request failed with status: ${response.status}`);
+      } catch {
+        throw new Error(`API request failed with status: ${response.status}`);
+      }
     }
 
-    const data = await response.json();
+    // レスポンスが空かどうか確認
+    const text = await response.text();
+    if (!text || text.trim() === '') {
+      throw new Error('空のレスポンスが返されました');
+    }
+
+    // JSONとしてパース
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('JSON Parse Error:', e);
+      console.error('Response text:', text);
+      throw new Error('レスポンスのJSONパースに失敗しました');
+    }
+
     const aiResponse = data.response;
+    if (!aiResponse) {
+      throw new Error('AIからの応答がありません');
+    }
     
     // AIの応答を履歴に追加
     conversationHistory.push({ role: "assistant", content: aiResponse });

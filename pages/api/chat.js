@@ -84,4 +84,5 @@ const handler = async (req, res) => {
   }
 };
 
-export { handler }; 
+// デフォルトエクスポートに変更
+export default handler; 
