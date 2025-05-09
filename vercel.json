@@ -9,16 +9,8 @@
       "maxDuration": 10
     }
   },
-  "routes": [
-    {
-      "src": "/api/chat",
-      "dest": "/api/chat.js",
-      "methods": ["POST", "OPTIONS"]
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/api/chat", "destination": "/api/chat.js" }
   ],
   "headers": [
     {
@@ -39,5 +31,6 @@
         }
       ]
     }
-  ]
+  ],
+  "trailingSlash": false
 } 
