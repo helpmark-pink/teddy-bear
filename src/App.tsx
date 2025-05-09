@@ -1,18 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChatHistory } from './components/ChatHistory';
 import { SpeechControls } from './components/SpeechControls';
 import { CharacterScene, lipSync } from './components/CharacterScene';
 import { useChatStore } from './store/chatStore';
 import { useChatAI } from './hooks/useChatAI';
 
+// Window型を拡張してoperaプロパティを追加
+declare global {
+  interface Window {
+    opera?: unknown;
+  }
+}
+
 function App() {
   const [inputText, setInputText] = useState('');
-  const { messages, isListening, setIsListening, setAudioEnabled } = useChatStore();
+  const { messages, isListening, setIsListening, setAudioEnabled, audioEnabled } = useChatStore();
   const { processMessage } = useChatAI(lipSync);
 
   // デバイスサイズの判定
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+  
+  // ユーザーエージェントからモバイルデバイスを検出
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
   
   // 画面サイズに基づく条件
   const isSmallDevice = windowWidth <= 375;
@@ -28,19 +38,77 @@ function App() {
     }
   };
 
-  const handleToggleListen = () => {
-    setIsListening(!isListening);
-    setAudioEnabled(!isListening);
-  };
+  const handleToggleListen = useCallback(() => {
+    const newState = !isListening;
+    setIsListening(newState);
+    setAudioEnabled(newState);
+    
+    // モバイルデバイスで音声を有効化する時、追加の初期化処理
+    if (newState && isMobileDevice) {
+      try {
+        // 音声合成の初期化（iOS Safariで必要）
+        const utterance = new SpeechSynthesisUtterance('');
+        utterance.volume = 0;
+        window.speechSynthesis.speak(utterance);
+        setTimeout(() => window.speechSynthesis.cancel(), 50);
+        
+        // AudioContextの初期化（Android Chrome等で必要）
+        // @ts-expect-error: AudioContext互換性の問題
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+      } catch (error) {
+        console.error('音声初期化エラー:', error);
+      }
+    }
+  }, [isListening, setIsListening, setAudioEnabled, isMobileDevice]);
 
+  // モバイルでの音声と表示の初期化
   useEffect(() => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      document.addEventListener('touchstart', () => {
+    // iOS Safariの音声再生問題に対応するためのタッチイベント追加
+    const initAudio = () => {
+      try {
+        // 音声合成の初期化
+        window.speechSynthesis.cancel(); // 既存の音声をキャンセル
+        
+        // 空の音声を再生してシステムを初期化
+        const utterance = new SpeechSynthesisUtterance('');
+        utterance.volume = 0;
+        window.speechSynthesis.speak(utterance);
+        
+        // AudioContextも初期化
         // @ts-expect-error: AudioContext互換性の問題
         const context = new (window.AudioContext || window.webkitAudioContext)();
+        if (context.state === 'suspended') {
         context.resume();
-      }, { once: true });
+        }
+        
+        console.log('Mobile audio initialized');
+      } catch (error) {
+        console.error('Mobile audio init error:', error);
+      }
+    };
+
+    // モバイルデバイスの検出
+    const detectMobileDevice = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || (window.opera ? window.opera : '');
+      const isMobile = /android|ipad|iphone|ipod|mobile|tablet/i.test(String(userAgent).toLowerCase());
+      setIsMobileDevice(isMobile);
+      
+      // モバイルデバイスの場合、デフォルトで音声を無効に
+      if (isMobile && !window.localStorage.getItem('audio-enabled')) {
+        setAudioEnabled(false);
+      }
+    };
+    
+    detectMobileDevice();
+
+    // モバイル用の音声初期化処理
+    if (isMobileDevice) {
+      // ユーザーインタラクション時に音声を初期化
+      document.addEventListener('touchstart', initAudio, { once: true });
+      document.addEventListener('click', initAudio, { once: true });
     }
 
     const setViewportHeight = () => {
@@ -62,8 +130,10 @@ function App() {
     return () => {
       window.removeEventListener('resize', setViewportHeight);
       window.removeEventListener('orientationchange', setViewportHeight);
+      document.removeEventListener('touchstart', initAudio);
+      document.removeEventListener('click', initAudio);
     };
-  }, []);
+  }, [isMobileDevice, setAudioEnabled]);
 
   // キャラクターコンテナのクラス名を決定
   const characterContainerClass = `w-full md:w-1/2 flex-shrink-0 character-container ${
@@ -96,6 +166,13 @@ function App() {
       : 'text-xl sm:text-2xl md:text-3xl py-2 sm:py-3 md:py-4'
   }`;
 
+  // 音声状態インジケータークラス
+  const audioStatusClass = `absolute top-1 right-1 text-xs px-2 py-0.5 rounded-full z-10 ${
+    audioEnabled
+      ? 'bg-green-100 text-green-800 border border-green-200'
+      : 'bg-gray-100 text-gray-600 border border-gray-200'
+  }`;
+
   return (
     <div 
       className="fixed inset-0 bg-gradient-to-b from-pink-100 via-pink-50 to-white flex flex-col" 
@@ -106,7 +183,12 @@ function App() {
       </h1>
       <div className="flex-1 flex flex-col md:flex-row gap-1 sm:gap-2 md:gap-4 p-1 sm:p-2 md:p-4 device-small device-medium device-large min-h-0 overflow-hidden">
         <div className={characterContainerClass}>
-          <div className="h-full bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-md sm:shadow-lg overflow-hidden border sm:border-2 md:border-4 border-pink-200">
+          <div className="h-full bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-md sm:shadow-lg overflow-hidden border sm:border-2 md:border-4 border-pink-200 relative">
+            {isMobileDevice && (
+              <span className={audioStatusClass}>
+                {audioEnabled ? '音声: ON' : '音声: OFF'}
+              </span>
+            )}
             <CharacterScene />
           </div>
         </div>
