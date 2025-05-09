@@ -83,6 +83,18 @@ body {
   }
 }
 
+/* 6.3インチスマホ用（429-510px幅） */
+@media screen and (min-width: 429px) and (max-width: 510px) {
+  .large-phone-character {
+    height: 42vh !important;
+    min-height: 240px !important;
+  }
+  
+  .large-phone-chat {
+    height: calc(58vh - 4rem) !important;
+  }
+}
+
 /* より大きなモバイルデバイス用 */
 @media screen and (min-width: 429px) and (max-width: 768px) {
   .device-medium {
@@ -109,6 +121,17 @@ body {
   
   .tall-device-chat {
     height: calc(65vh - 4rem) !important;
+  }
+}
+
+/* 6.3インチの縦長デバイス対応 */
+@media screen and (min-width: 429px) and (max-width: 510px) and (min-height: 850px) {
+  .large-phone-character {
+    height: 38vh !important;
+  }
+  
+  .large-phone-chat {
+    height: calc(62vh - 4rem) !important;
   }
 }
 

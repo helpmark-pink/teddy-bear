@@ -6,6 +6,7 @@ import * as THREE from 'three';
 
 const lipSync = new LipSyncController();
 
+// THREE.Object3Dを拡張したインターフェースを修正
 interface MeshWithMaterial extends THREE.Object3D {
   isMesh?: boolean;
   material?: THREE.Material & {
@@ -13,8 +14,6 @@ interface MeshWithMaterial extends THREE.Object3D {
     roughness?: number;
     envMapIntensity?: number;
   };
-  castShadow?: boolean;
-  receiveShadow?: boolean;
 }
 
 function Character({ url, scale }: { url: string, scale: number }) {
@@ -27,15 +26,24 @@ function Character({ url, scale }: { url: string, scale: number }) {
     }
   }, []);
 
-  scene.traverse((node: MeshWithMaterial) => {
-    if (node.isMesh) {
-      if (node.material) {
-        node.material.metalness = 0.3;
-        node.material.roughness = 0.7;
-        node.material.envMapIntensity = 1.5;
+  scene.traverse((node: THREE.Object3D) => {
+    if ((node as any).isMesh) {
+      const mesh = node as THREE.Mesh;
+      if (mesh.material) {
+        const material = mesh.material as THREE.Material & {
+          metalness?: number;
+          roughness?: number;
+          envMapIntensity?: number;
+        };
+        
+        if (material) {
+          material.metalness = 0.3;
+          material.roughness = 0.7;
+          material.envMapIntensity = 1.5;
+        }
       }
-      node.castShadow = true;
-      node.receiveShadow = true;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
     }
   });
   
@@ -66,6 +74,12 @@ export const CharacterScene: React.FC = () => {
         setModelScale(1.1);
         setCameraFov(48);
         setCameraPosition([0, -0.3, 5.8]);
+      }
+      // 大型スマホ（6.3インチなど）
+      else if (width <= 510) {
+        setModelScale(1.15);
+        setCameraFov(46);
+        setCameraPosition([0, -0.2, 5.9]);
       }
       // 横長の画面
       else if (aspectRatio > 1.5) {

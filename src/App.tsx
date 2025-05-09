@@ -17,7 +17,9 @@ function App() {
   // 画面サイズに基づく条件
   const isSmallDevice = windowWidth <= 375;
   const isIPhone16 = windowWidth >= 390 && windowWidth <= 428;
-  const isTallDevice = windowWidth >= 390 && windowHeight >= 800 && windowWidth <= 428; 
+  const isTallDevice = windowWidth >= 390 && windowHeight >= 800 && windowWidth <= 428;
+  // 6.3インチ以上のスマホ対応用（大型スマホ）
+  const isLargePhone = windowWidth > 428 && windowWidth <= 510;
 
   const handleSendMessage = () => {
     if (inputText.trim()) {
@@ -65,22 +67,26 @@ function App() {
 
   // キャラクターコンテナのクラス名を決定
   const characterContainerClass = `w-full md:w-1/2 flex-shrink-0 character-container ${
-    isIPhone16 
-      ? 'iphone16-character' 
-      : isSmallDevice 
-        ? 'model-container-small'
-        : isTallDevice
-          ? 'tall-device-character'
-          : 'h-[35vh] sm:h-[40vh] md:h-full'
+    isLargePhone
+      ? 'large-phone-character'
+      : isIPhone16 
+        ? 'iphone16-character' 
+        : isSmallDevice 
+          ? 'model-container-small'
+          : isTallDevice
+            ? 'tall-device-character'
+            : 'h-[35vh] sm:h-[40vh] md:h-full'
   }`;
 
   // チャットコンテナのクラス名を決定
   const chatContainerClass = `w-full md:w-1/2 flex-1 flex flex-col ${
-    isIPhone16 
-      ? 'iphone16-chat' 
-      : isTallDevice
-        ? 'tall-device-chat'
-        : 'h-[calc(65vh-4rem)] sm:h-[calc(60vh-4rem)] md:h-full'
+    isLargePhone
+      ? 'large-phone-chat'
+      : isIPhone16 
+        ? 'iphone16-chat' 
+        : isTallDevice
+          ? 'tall-device-chat'
+          : 'h-[calc(65vh-4rem)] sm:h-[calc(60vh-4rem)] md:h-full'
   } ${isSmallDevice ? 'chat-height-small' : ''}`;
 
   return (
