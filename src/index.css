@@ -47,6 +47,11 @@ body {
   .easy-phone-button {
     padding: 0.75rem !important;
   }
+
+  /* 3Dモデル調整 */
+  .model-container-small {
+    height: 38vh !important;
+  }
 }
 
 /* 小型デバイス用 */
@@ -58,16 +63,23 @@ body {
   .chat-height-small {
     max-height: 55vh !important;
   }
+
+  /* 3Dモデル調整 */
+  .model-container-small {
+    height: 40vh !important;
+    min-height: 200px !important;
+  }
 }
 
 /* iPhone 16/Pro 用 */
 @media screen and (min-width: 390px) and (max-width: 428px) {
   .iphone16-character {
-    height: 38vh !important;
+    height: 40vh !important;
+    min-height: 220px !important;
   }
   
   .iphone16-chat {
-    height: calc(62vh - 4rem) !important;
+    height: calc(60vh - 4rem) !important;
   }
 }
 
@@ -76,6 +88,10 @@ body {
   .device-medium {
     padding: 0.75rem !important;
   }
+
+  .model-container-medium {
+    height: 45vh !important;
+  }
 }
 
 /* 大画面デバイス向け最適化 */
@@ -83,6 +99,30 @@ body {
   .device-large {
     padding: 1rem !important;
   }
+}
+
+/* 超縦長デバイス対応（iPhone Pro Max等） */
+@media screen and (min-width: 390px) and (min-height: 800px) and (max-width: 428px) {
+  .tall-device-character {
+    height: 35vh !important;
+  }
+  
+  .tall-device-chat {
+    height: calc(65vh - 4rem) !important;
+  }
+}
+
+/* 3Dモデル容器のスタイリング */
+.character-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.character-container canvas {
+  outline: none;
+  touch-action: none;
 }
 
 /* 固定フッター */

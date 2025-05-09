@@ -10,6 +10,15 @@ function App() {
   const { messages, isListening, setIsListening, setAudioEnabled } = useChatStore();
   const { processMessage } = useChatAI(lipSync);
 
+  // デバイスサイズの判定
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+  
+  // 画面サイズに基づく条件
+  const isSmallDevice = windowWidth <= 375;
+  const isIPhone16 = windowWidth >= 390 && windowWidth <= 428;
+  const isTallDevice = windowWidth >= 390 && windowHeight >= 800 && windowWidth <= 428; 
+
   const handleSendMessage = () => {
     if (inputText.trim()) {
       processMessage(inputText);
@@ -26,8 +35,8 @@ function App() {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) {
       document.addEventListener('touchstart', () => {
-        // @ts-ignore: AudioContext互換性のためにanyを使用
-        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        // @ts-expect-error: AudioContext互換性の問題
+        const context = new (window.AudioContext || window.webkitAudioContext)();
         context.resume();
       }, { once: true });
     }
@@ -37,6 +46,9 @@ function App() {
       document.documentElement.style.setProperty('--vh', `${vh}px`);
       // アプリの高さも設定
       document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+      // 画面サイズを更新
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
     };
 
     setViewportHeight();
@@ -51,9 +63,25 @@ function App() {
     };
   }, []);
 
-  // デバイスサイズの判定
-  const isSmallDevice = window.innerWidth <= 375;
-  const isIPhone16 = window.innerWidth >= 390 && window.innerWidth <= 428;
+  // キャラクターコンテナのクラス名を決定
+  const characterContainerClass = `w-full md:w-1/2 flex-shrink-0 character-container ${
+    isIPhone16 
+      ? 'iphone16-character' 
+      : isSmallDevice 
+        ? 'model-container-small'
+        : isTallDevice
+          ? 'tall-device-character'
+          : 'h-[35vh] sm:h-[40vh] md:h-full'
+  }`;
+
+  // チャットコンテナのクラス名を決定
+  const chatContainerClass = `w-full md:w-1/2 flex-1 flex flex-col ${
+    isIPhone16 
+      ? 'iphone16-chat' 
+      : isTallDevice
+        ? 'tall-device-chat'
+        : 'h-[calc(65vh-4rem)] sm:h-[calc(60vh-4rem)] md:h-full'
+  } ${isSmallDevice ? 'chat-height-small' : ''}`;
 
   return (
     <div 
@@ -64,16 +92,12 @@ function App() {
         AI チャットフレンド
       </h1>
       <div className="flex-1 flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-4 p-2 sm:p-3 md:p-4 device-small device-medium device-large min-h-0 overflow-hidden">
-        <div className={`w-full md:w-1/2 flex-shrink-0 ${
-          isIPhone16 ? 'iphone16-character' : 'h-[35vh] sm:h-[40vh] md:h-full'
-        }`}>
+        <div className={characterContainerClass}>
           <div className="h-full bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-md sm:shadow-lg overflow-hidden border sm:border-2 md:border-4 border-pink-200">
             <CharacterScene />
           </div>
         </div>
-        <div className={`w-full md:w-1/2 flex-1 flex flex-col ${
-          isIPhone16 ? 'iphone16-chat' : 'h-[calc(65vh-4rem)] sm:h-[calc(60vh-4rem)] md:h-full'
-        } ${isSmallDevice ? 'chat-height-small' : ''}`}>
+        <div className={chatContainerClass}>
           <div className="w-full h-full bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-md sm:shadow-lg overflow-hidden border sm:border-2 md:border-4 border-pink-200 flex flex-col">
             <div className="flex-1 overflow-hidden">
               <ChatHistory messages={messages} />
