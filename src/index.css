@@ -4,6 +4,7 @@
 
 html {
   height: -webkit-fill-available;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -13,9 +14,17 @@ body {
   position: fixed;
   width: 100%;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+  touch-action: manipulation;
 }
 
 #root {
   height: 100vh;
   height: calc(var(--vh, 1vh) * 100);
+}
+
+@supports (-webkit-touch-callout: none) {
+  .h-screen {
+    height: -webkit-fill-available;
+  }
 }
