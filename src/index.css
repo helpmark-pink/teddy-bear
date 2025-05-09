@@ -33,6 +33,51 @@ body {
   }
 }
 
+/* 共通のモバイル設定 - すべてのスマートフォンに適用 */
+@media screen and (max-width: 768px) {
+  /* 全体の余白調整 */
+  .device-small, .device-medium {
+    padding: 0.35rem !important;
+    gap: 0.35rem !important;
+  }
+  
+  /* タイトル部分を最小化 */
+  h1 {
+    font-size: 1.1rem !important;
+    padding: 0.3rem 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* チャット入力欄の最適化 */
+  .chat-input-area {
+    padding: 0.35rem !important;
+    min-height: 2.5rem !important;
+  }
+
+  /* チャットコンテナの最低高さを保証 */
+  .chat-container {
+    min-height: 150px !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* チャット履歴エリアが必ず表示されるように */
+  .chat-history {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 100px !important;
+  }
+
+  /* フッターを固定 */
+  .chat-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    background-color: white !important;
+    z-index: 20 !important;
+  }
+}
+
 /* らくらくフォン用の大きいフォントと要素サイズ */
 @media screen and (max-width: 320px) {
   .easy-phone-text {
@@ -50,59 +95,84 @@ body {
 
   /* 3Dモデル調整 */
   .model-container-small {
-    height: 38vh !important;
+    height: 35vh !important;
+    max-height: 180px !important;
+  }
+  
+  /* チャットエリア調整 */
+  .chat-height-small {
+    height: calc(65vh - 3.5rem) !important;
   }
 }
 
 /* 小型デバイス用 */
 @media screen and (max-width: 375px) {
   .device-small {
-    padding: 0.5rem !important;
+    padding: 0.4rem !important;
   }
   
   .chat-height-small {
-    max-height: 55vh !important;
+    height: calc(65vh - 3.5rem) !important;
   }
 
   /* 3Dモデル調整 */
   .model-container-small {
-    height: 40vh !important;
-    min-height: 200px !important;
+    height: 35vh !important;
+    min-height: 180px !important;
+    max-height: 200px !important;
   }
 }
 
-/* iPhone 16/Pro 用 */
+/* iPhone 16/Pro 用 - 修正版 */
 @media screen and (min-width: 390px) and (max-width: 428px) {
   .iphone16-character {
-    height: 40vh !important;
-    min-height: 220px !important;
+    height: 30vh !important;
+    min-height: 180px !important;
+    max-height: 220px !important;
   }
   
   .iphone16-chat {
-    height: calc(60vh - 4rem) !important;
+    height: calc(70vh - 3.5rem) !important;
+    min-height: 200px !important;
+  }
+  
+  /* アプリ全体の余白を調整 */
+  .device-small, .device-medium {
+    padding: 0.35rem !important;
+    gap: 0.35rem !important;
   }
 }
 
 /* 6.3インチスマホ用（429-510px幅） */
 @media screen and (min-width: 429px) and (max-width: 510px) {
   .large-phone-character {
-    height: 42vh !important;
-    min-height: 240px !important;
+    height: 35vh !important;
+    min-height: 180px !important;
+    max-height: 280px !important;
   }
   
   .large-phone-chat {
-    height: calc(58vh - 4rem) !important;
+    height: calc(65vh - 3.5rem) !important;
+    min-height: 220px !important;
   }
 }
 
 /* より大きなモバイルデバイス用 */
-@media screen and (min-width: 429px) and (max-width: 768px) {
+@media screen and (min-width: 511px) and (max-width: 768px) {
   .device-medium {
-    padding: 0.75rem !important;
+    padding: 0.5rem !important;
+    gap: 0.5rem !important;
   }
 
-  .model-container-medium {
-    height: 45vh !important;
+  /* 固定値を使用するスタイル調整 */
+  .h-\[35vh\] {
+    height: 30vh !important;
+    min-height: 200px !important;
+  }
+  
+  .h-\[calc\(65vh-4rem\)\] {
+    height: calc(70vh - 3.5rem) !important;
+    min-height: 250px !important;
   }
 }
 
@@ -116,22 +186,26 @@ body {
 /* 超縦長デバイス対応（iPhone Pro Max等） */
 @media screen and (min-width: 390px) and (min-height: 800px) and (max-width: 428px) {
   .tall-device-character {
-    height: 35vh !important;
+    height: 30vh !important;
+    min-height: 180px !important;
   }
   
   .tall-device-chat {
-    height: calc(65vh - 4rem) !important;
+    height: calc(70vh - 3.5rem) !important;
+    min-height: 350px !important;
   }
 }
 
 /* 6.3インチの縦長デバイス対応 */
 @media screen and (min-width: 429px) and (max-width: 510px) and (min-height: 850px) {
   .large-phone-character {
-    height: 38vh !important;
+    height: 32vh !important;
+    min-height: 180px !important;
   }
   
   .large-phone-chat {
-    height: calc(62vh - 4rem) !important;
+    height: calc(68vh - 3.5rem) !important;
+    min-height: 350px !important;
   }
 }
 

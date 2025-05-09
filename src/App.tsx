@@ -89,23 +89,30 @@ function App() {
           : 'h-[calc(65vh-4rem)] sm:h-[calc(60vh-4rem)] md:h-full'
   } ${isSmallDevice ? 'chat-height-small' : ''}`;
 
+  // タイトルのクラス名を決定
+  const titleClass = `font-bold text-center text-pink-600 drop-shadow-sm easy-phone-text ${
+    isIPhone16 || isTallDevice
+      ? 'text-lg py-1'
+      : 'text-xl sm:text-2xl md:text-3xl py-2 sm:py-3 md:py-4'
+  }`;
+
   return (
     <div 
       className="fixed inset-0 bg-gradient-to-b from-pink-100 via-pink-50 to-white flex flex-col" 
       style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
     >
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-center py-2 sm:py-3 md:py-4 text-pink-600 drop-shadow-sm easy-phone-text">
+      <h1 className={titleClass}>
         AI チャットフレンド
       </h1>
-      <div className="flex-1 flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-4 p-2 sm:p-3 md:p-4 device-small device-medium device-large min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row gap-1 sm:gap-2 md:gap-4 p-1 sm:p-2 md:p-4 device-small device-medium device-large min-h-0 overflow-hidden">
         <div className={characterContainerClass}>
           <div className="h-full bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-md sm:shadow-lg overflow-hidden border sm:border-2 md:border-4 border-pink-200">
             <CharacterScene />
           </div>
         </div>
         <div className={chatContainerClass}>
-          <div className="w-full h-full bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-md sm:shadow-lg overflow-hidden border sm:border-2 md:border-4 border-pink-200 flex flex-col">
-            <div className="flex-1 overflow-hidden">
+          <div className="w-full h-full bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-md sm:shadow-lg overflow-hidden border sm:border-2 md:border-4 border-pink-200 flex flex-col chat-container">
+            <div className="flex-1 overflow-hidden chat-history">
               <ChatHistory messages={messages} />
             </div>
             <div className="chat-footer">
