@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --app-height: 100%;
+}
+
 html {
   height: -webkit-fill-available;
   -webkit-tap-highlight-color: transparent;
@@ -27,4 +31,74 @@ body {
   .h-screen {
     height: -webkit-fill-available;
   }
+}
+
+/* らくらくフォン用の大きいフォントと要素サイズ */
+@media screen and (max-width: 320px) {
+  .easy-phone-text {
+    font-size: 1.2rem !important;
+  }
+  
+  .easy-phone-input {
+    font-size: 1.1rem !important;
+    height: 3rem !important;
+  }
+  
+  .easy-phone-button {
+    padding: 0.75rem !important;
+  }
+}
+
+/* 小型デバイス用 */
+@media screen and (max-width: 375px) {
+  .device-small {
+    padding: 0.5rem !important;
+  }
+  
+  .chat-height-small {
+    max-height: 55vh !important;
+  }
+}
+
+/* iPhone 16/Pro 用 */
+@media screen and (min-width: 390px) and (max-width: 428px) {
+  .iphone16-character {
+    height: 38vh !important;
+  }
+  
+  .iphone16-chat {
+    height: calc(62vh - 4rem) !important;
+  }
+}
+
+/* より大きなモバイルデバイス用 */
+@media screen and (min-width: 429px) and (max-width: 768px) {
+  .device-medium {
+    padding: 0.75rem !important;
+  }
+}
+
+/* 大画面デバイス向け最適化 */
+@media screen and (min-width: 769px) {
+  .device-large {
+    padding: 1rem !important;
+  }
+}
+
+/* 固定フッター */
+.chat-footer {
+  position: sticky;
+  bottom: 0;
+  background-color: white;
+  width: 100%;
+  z-index: 10;
+  border-top: 1px solid #fce7f3;
+}
+
+/* 入力エリア最適化 */
+.chat-input-area {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  gap: 0.5rem;
 }
