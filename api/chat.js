@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import { Configuration, OpenAIApi } from 'openai';
 
 export default async function handler(req, res) {
   // CORSヘッダーを設定
@@ -33,9 +33,11 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'OpenAI APIキーが設定されていません。環境変数を確認してください。' });
     }
     
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
+    // OpenAI APIの設定
+    const configuration = new Configuration({
+      apiKey: process.env.OPENAI_API_KEY,
     });
+    const openai = new OpenAIApi(configuration);
     
     const systemPrompt = `
 あなたは可愛らしい3Dキャラクターとして会話します。
@@ -57,16 +59,16 @@ export default async function handler(req, res) {
       { role: "user", content: message }
     ];
     
-    const completion = await openai.chat.completions.create({
-      messages,
+    const completion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
+      messages: messages,
       temperature: 0.9,
       max_tokens: 200,
       presence_penalty: 0.3,
       frequency_penalty: 0.3
     });
     
-    const response = completion.choices[0].message.content || 'ごめんね、うまく答えられなかったよ...';
+    const response = completion.data.choices[0].message.content || 'ごめんね、うまく答えられなかったよ...';
     
     return res.status(200).json({ response });
   } catch (error) {
