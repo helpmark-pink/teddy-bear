@@ -13,16 +13,31 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages }) => {
   const clearHistory = useChatStore((state) => state.clearHistory);
 
   // デバイスサイズを判定
-  const isSmallDevice = window.innerWidth <= 375;
   const isEasyPhone = window.innerWidth <= 320;
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
+  // メッセージが追加されたら自動的に一番下までスクロール
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // 自動スクロールの強化
+  useEffect(() => {
+    // 初期ロード時に明示的にスクロール位置を設定
+    const chatContainer = chatContainerRef.current;
+    if (chatContainer) {
+      // コンテンツが読み込まれたあとに確実にスクロールするために少し遅延
+      setTimeout(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        scrollToBottom();
+      }, 100);
+    }
+  }, []);
 
   // スワイプ操作のハンドリング（タッチデバイス用）
   useEffect(() => {
@@ -43,12 +58,13 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages }) => {
       
       // 縦方向のスクロールが横方向より大きい場合のみ処理
       if (Math.abs(deltaY) > Math.abs(deltaX)) {
-        e.stopPropagation();
+        // スクロール操作を許可するために親要素への伝播を防止しない
+        // チャットコンテナ自体のスクロールを許可
       }
     };
 
     chatContainer.addEventListener('touchstart', handleTouchStart);
-    chatContainer.addEventListener('touchmove', handleTouchMove);
+    chatContainer.addEventListener('touchmove', handleTouchMove, { passive: true });
 
     return () => {
       chatContainer.removeEventListener('touchstart', handleTouchStart);
@@ -63,51 +79,56 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages }) => {
       style={{ 
         WebkitOverflowScrolling: 'touch',
         overscrollBehavior: 'contain',
-        maxHeight: isSmallDevice ? '55vh' : 'auto' 
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'rgba(244, 114, 182, 0.5) transparent',
+        height: '100%',
+        maxHeight: '100%'
       }}
     >
       {messages.length > 0 && (
         <button
           onClick={clearHistory}
-          className="absolute top-2 right-2 p-1.5 sm:p-2 rounded-full bg-pink-100 hover:bg-pink-200 transition-colors"
+          className="sticky top-2 right-2 float-right p-1.5 sm:p-2 rounded-full bg-pink-100 hover:bg-pink-200 transition-colors z-10"
           title="履歴を消去"
           aria-label="チャット履歴を消去"
         >
           <Trash2 className={`w-3 h-3 sm:w-4 sm:h-4 text-pink-600 ${isEasyPhone ? 'w-4 h-4' : ''}`} />
         </button>
       )}
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={`flex items-start gap-1.5 sm:gap-2 ${
-            message.sender === 'user' ? 'flex-row-reverse' : ''
-          }`}
-        >
+      <div className="space-y-2 sm:space-y-3 md:space-y-4 clear-right">
+        {messages.map((message) => (
           <div
-            className={`w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-md ${
-              message.sender === 'user' 
-                ? 'bg-gradient-to-br from-pink-400 to-pink-500' 
-                : 'bg-gradient-to-br from-purple-400 to-pink-400'
-            } ${isEasyPhone ? 'w-8 h-8' : ''}`}
+            key={message.id}
+            className={`flex items-start gap-1.5 sm:gap-2 ${
+              message.sender === 'user' ? 'flex-row-reverse' : ''
+            }`}
           >
-            {message.sender === 'user' ? (
-              <MessageCircle className={`w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white ${isEasyPhone ? 'w-5 h-5' : ''}`} />
-            ) : (
-              <Bot className={`w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white ${isEasyPhone ? 'w-5 h-5' : ''}`} />
-            )}
+            <div
+              className={`w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-md ${
+                message.sender === 'user' 
+                  ? 'bg-gradient-to-br from-pink-400 to-pink-500' 
+                  : 'bg-gradient-to-br from-purple-400 to-pink-400'
+              } ${isEasyPhone ? 'w-8 h-8' : ''}`}
+            >
+              {message.sender === 'user' ? (
+                <MessageCircle className={`w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white ${isEasyPhone ? 'w-5 h-5' : ''}`} />
+              ) : (
+                <Bot className={`w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white ${isEasyPhone ? 'w-5 h-5' : ''}`} />
+              )}
+            </div>
+            <div
+              className={`max-w-[80%] rounded-lg sm:rounded-xl md:rounded-2xl p-1.5 sm:p-2 md:p-3 shadow-md ${
+                message.sender === 'user'
+                  ? 'bg-gradient-to-r from-pink-400 to-pink-500 text-white'
+                  : 'bg-white border border-pink-200 sm:border-2'
+              } ${isEasyPhone ? 'easy-phone-text' : ''}`}
+            >
+              {message.text}
+            </div>
           </div>
-          <div
-            className={`max-w-[80%] rounded-lg sm:rounded-xl md:rounded-2xl p-1.5 sm:p-2 md:p-3 shadow-md ${
-              message.sender === 'user'
-                ? 'bg-gradient-to-r from-pink-400 to-pink-500 text-white'
-                : 'bg-white border border-pink-200 sm:border-2'
-            } ${isEasyPhone ? 'easy-phone-text' : ''}`}
-          >
-            {message.text}
-          </div>
-        </div>
-      ))}
-      <div ref={messagesEndRef} />
+        ))}
+      </div>
+      <div ref={messagesEndRef} className="h-0 w-full" />
     </div>
   );
 };
